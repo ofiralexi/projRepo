@@ -1,10 +1,13 @@
 import os
 import time
 import picamera
+import sys
+sys.path.append("/home/pi/Desktop/scripts/detecting")
+import detect
 
 
-def calc_direction():
-	return "up"
+def calc_direction(image_path):
+	return detect.find_balloon(image_path)
 
 
 def move_drone():
@@ -13,11 +16,12 @@ def move_drone():
 
 def take_picture(image_num):
 	print("preparing to take picture...")
+	image_path = "images/image"+image_num+".jpg"
 	with picamera.PiCamera() as camera:
 		camera.resolution = (1280,720)
-		camera.capture("images/image"+image_num+".jpg")
+		camera.capture(image_path)
 	print("calculating direction...")
-	calc_direction()
+	print(calc_direction(image_path))
 	print("moving drone...")
 	move_drone()
 	print("==============================")
@@ -32,4 +36,4 @@ print("==============================")
 while 1:
 	take_picture(str(i))
 	i = i + 1
-	time.sleep(2)
+	# time.sleep(2)
