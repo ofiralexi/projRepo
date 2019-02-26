@@ -18,7 +18,7 @@ def move_drone():
 def take_picture(imagenum, connection):
 	if imagenum == 5: #send signal we're done
 		connection.write(struct.pack('<L', 0))
-	print("preparing to take picture...")
+		return
 	with picamera.PiCamera() as camera:
 		camera.resolution = (1280,720)
 		stream = io.BytesIO()
@@ -28,28 +28,31 @@ def take_picture(imagenum, connection):
 		# Rewind the stream and send the image data over the wire
 		stream.seek(0)
 		connection.write(stream.read())
-		print("sent to server")
+		print("picture "+str(imagenum)+" sent to server")
 		# Reset the stream for the next capture
 		stream.seek(0)
 		stream.truncate()
-		print("===========================")
+		print("=== direction:" + client_directions.recv(1024).decode())
+		print("----------")
 
 
-# clear files in images
-dir_name = "./images"
-[os.remove(os.path.join(dir_name,f)) for f in os.listdir(dir_name)]
 try:
-	# Connect a client socket to my_server:8000
-	print("trying to connect to server")
-	client_socket = socket.socket()
-	client_socket.connect(('132.68.47.189', 8000))
-	connection = client_socket.makefile('wb')
+	# Connect a client socket to my_server:8000 for sending images
+	print("trying to connect socket 1")
+	client_images = socket.socket()
+	client_images.connect(('132.68.47.189', 8000))
+	connection = client_images.makefile('wb')
+	# Connect a client socket to my_server:8001 for recieving inputs
+	print("trying to connect socket 2")
+	client_directions = socket.socket()
+	client_directions.connect(('132.68.47.189', 8001))
 	print("connected to server succesfuly")
 	#start the run
 	print("==============================")
 	for i in range(1,6):
 		take_picture(i, connection)
-		time.sleep(6)
+		time.sleep(2)
 finally:
 	connection.close()
-	client_socket.close()
+	client_images.close()
+	client_directions.close()
