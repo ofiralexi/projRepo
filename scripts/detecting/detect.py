@@ -84,7 +84,7 @@ def find_balloons(img_path):
         x_center = (box[1] + box[3])/2
         vertical = "up" if y_center < 0.45 else "down" if y_center > 0.55 else ""
         horizontal = "left" if x_center < 0.45 else "right" if x_center > 0.55 else ""
-    return vertical + (" and " if vertical != "" and horizontal != "" else "") + horizontal
+    return vertical, horizontal
 
 
 '''
