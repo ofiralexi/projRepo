@@ -1,11 +1,12 @@
+print('yo')
 import io
 import socket
 import struct
 from PIL import Image
 import detect
 
-from fly_drone import * 
 
+print('here')
 # Start a socket listening for image_connections on 0.0.0.0:8000 (0.0.0.0 means
 # all interfaces)
 image_socket = socket.socket()
@@ -22,8 +23,10 @@ print('conenct')
 direction_connection = direction_socket.accept()[0]
 count = 1
 
-arm_and_takeoff(50)
-time.sleep(15)
+#arm_and_takeoff(50)
+#time.sleep(15)
+
+dirs = ["right", "left", "up", "down"]
 
 try:
 	while True:
@@ -31,8 +34,8 @@ try:
 		# length is zero, quit the loop
 		image_len = struct.unpack('<L', image_connection.read(struct.calcsize('<L')))[0]
 		if not image_len:
-			print("WTF")
-			break
+			print("NO MORE iM")
+			continue
 		# Construct a stream to hold the image data and read the image
 		# data from the image_connection
 		image_stream = io.BytesIO()
@@ -48,23 +51,26 @@ try:
 		img_path = 'out' + str(count) + '.jpg'
 		count += 1
 		image.save(img_path)
-		vertical, horizontal = detect.find_balloons(img_path)
-		direction = vertical + horizontal
-		if direction == "" :
-			direction = "forward"
-			drive(direction)
-			time.sleep(5)
-		if vertical != "":
-			drive(vertical)
-			time.sleep(5)
-		if horizontal != "":
-			drive(horizontal)
-			time.sleep(5)
+		print("HERE?")
+		vertical, horizontal, y_center, x_center = detect.find_balloons(img_path)
+		print (vertical)
+		print (horizontal)
+		print(y_center)
+		print(x_center)
+		direction = "forward"
+		if x_center > 0:
+			if vertical:
+				direction += " " +vertical
+			if horizontal:
+				direction += " " + horizontal
+		else:
+			direction = "stay"
 		direction_connection.send(direction.encode())
-
+except Exception as e:
+	print(e)
+	print("DONE?")
 
 finally:
-	drive("r")
 	image_connection.close()
 	image_socket.close()
 	direction_connection.close()

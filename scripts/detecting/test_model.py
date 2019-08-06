@@ -1,28 +1,44 @@
+# Import packages
 import tensorflow as tf
 import sys
 import os
 import cv2
 import numpy as np
 import glob
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('image_path', help="Absolute or relative path to an image.")
+parser.add_argument('--with_image', help="Present results on image", action="store_true")
+parser.add_argument('--textual', help="Present results in textual format", action="store_true")
+
+args = parser.parse_args()
+
 
 # Import utilites
 import label_map_util
 import visualization_utils as vis_util
 
-# Path to image
-PATH_TO_IMAGE = '1.png'
+
+
 
 # Name of the directory containing the object detection module we're using
 MODEL_NAME = 'inference_graph'
+#IMAGE_NAME = 'test1.jpg'
 
 # Grab path to current working directory
 CWD_PATH = os.getcwd()
+
 # Path to frozen detection graph .pb file, which contains the model that is used
 # for object detection.
 PATH_TO_CKPT = os.path.join(CWD_PATH,MODEL_NAME,'frozen_inference_graph.pb')
 
 # Path to label map file
 PATH_TO_LABELS = os.path.join(CWD_PATH,'training','labelmap.pbtxt')
+
+# Path to image
+PATH_TO_IMAGE = args.image_path
+#PATH_TO_IMAGE = img
 
 # Number of classes the object detector can identify
 NUM_CLASSES = 1
@@ -64,75 +80,56 @@ detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
 # Number of objects detected
 num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
-MIN_CONFIDENCE = 0.85
-
-def find_balloons(img_path):
-    image = cv2.imread(img_path)
-    image_expanded = np.expand_dims(image, axis=0)
-    (boxes, scores, classes, num) = sess.run(
-    	[detection_boxes, detection_scores, detection_classes, num_detections],
-    	feed_dict={image_tensor: image_expanded})
-    box = None
-    vertical = ""
-    horizontal = ""
-    for i in range(scores.shape[1]):
-        if scores[0,i]>MIN_CONFIDENCE:
-            box = tuple(boxes[0][i].tolist())
-            break
-    y_center = -1
-    x_center = -1
-    if box:
-        y_center = (box[0] + box[2])/2
-        x_center = (box[1] + box[3])/2
-        vertical = "up" if y_center < 0.38 else "down" if y_center > 0.88 else ""
-        horizontal = "left" if x_center < 0.4 else "right" if x_center > 0.6 else ""
-    return vertical, horizontal, y_center, x_center
-
-
-'''
 # Load image using OpenCV and
 # expand image dimensions to have shape: [1, None, None, 3]
 # i.e. a single-column array, where each item in the column has the pixel RGB value
+print(PATH_TO_IMAGE)
 image = cv2.imread(PATH_TO_IMAGE)
+print(image)
 image_expanded = np.expand_dims(image, axis=0)
+print(image_expanded)
 
 # Perform the actual detection by running the model with the image as input
 (boxes, scores, classes, num) = sess.run(
 	[detection_boxes, detection_scores, detection_classes, num_detections],
 	feed_dict={image_tensor: image_expanded})
 
-print("boxes\n", boxes)
-print("scores\n", scores)
-print("classes\n", classes)
-print("num\n", num)
-print(image.shape)
+	
+
+if args.textual:
+	# Print textual data on terminal screen.
+	print("\n\n"+"="*50+"	Results    "+"="*50+"\n\n")
+	print("        Class               Surety")
+	print()
+	count = 0
+	for i in range(scores.shape[1]):
+		if scores[0,i]>0.8:
+			print("    "+str(i+1)+".  "+str(category_index.get(classes[0,i])['name'])+"    ==>    "+str(scores[0,i]*100)+' %')
+			print()
+			count+=1
+			
+	print("\n	Total "+str(count)+" objects classified.\n")
 
 
-count = 0
-for i in range(scores.shape[1]):
-    if scores[0,i]>0.8:
-        print("    "+str(i+1)+".  "+str(category_index.get(classes[0,i])['name'])+"    ==>    "+str(scores[0,i]*100)+' %')
-        print(boxes[0][i][0]*image.shape[0])
-        print(boxes[0][i][1]*image.shape[1])
-        print(boxes[0][i][2]*image.shape[0])
-        print(boxes[0][i][3]*image.shape[1])
-        count+=1
+if args.with_image:
+	# Draw the results of the detection.
+	vis_util.visualize_boxes_and_labels_on_image_array(
+		image,
+		np.squeeze(boxes),
+		np.squeeze(classes).astype(np.int32),
+		np.squeeze(scores),
+		category_index,
+		use_normalized_coordinates=True,
+		line_thickness=8,
+		min_score_thresh=0.80)
 
-#540,960
+	# All the results have been drawn on image. Now display the image.
+	cv2.imshow('Object detector', image)
+	#cv2.imwrite(img[:-4] + "_proccessed.jpg", image)
 
-print("\n	Total "+str(count)+" objects classified.\n")
-vis_util.visualize_boxes_and_labels_on_image_array(
-    image,
-    np.squeeze(boxes),
-    np.squeeze(classes).astype(np.int32),
-    np.squeeze(scores),
-    category_index,
-    use_normalized_coordinates=True,
-    line_thickness=8,
-    min_score_thresh=0.80)
 
-cv2.imwrite("proccessed.jpg", image)
-#cv2.imshow('Object detector', image)
-#cv2.waitKey(0)
-#cv2.destroyAllWindows()
-'''
+# Press any key to close the image
+cv2.waitKey(0)
+
+# Clean up
+cv2.destroyAllWindows()
