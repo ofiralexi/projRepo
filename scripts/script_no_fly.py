@@ -4,13 +4,11 @@ import sys
 import io
 import socket
 import struct
-from fly_drone import *
 import picamera
 
 camera = picamera.PiCamera()
 camera.resolution = (2592,1944)
 time.sleep(30)
-
 
 def take_picture(imagenum, connection):
 	if imagenum == 5: #send signal we're done
@@ -18,9 +16,7 @@ def take_picture(imagenum, connection):
 		return
 	stream = io.BytesIO()
 	camera.capture(stream,'jpeg')
-
-
-	time.sleep(1)
+	time.sleep(3)
 	connection.write(struct.pack('<L', stream.tell()))
 	connection.flush()
 	# Rewind the stream and send the image data over the wire
@@ -37,11 +33,6 @@ def take_picture(imagenum, connection):
 	stream.truncate()
 	direction = client_directions.recv(1024).decode()
 	print("=== direction:" + direction)
-	print(direction.split(" "))
-	for dir in direction.split(" "):
-		drive(dir)
-		time.sleep(1)
-	# time.sleep(1)
 	print("----------")
 
 
@@ -59,15 +50,13 @@ try:
 	print("connected to server succesfuly")
 	#start the run
 	print("========== taking off ==========")
-	arm_and_takeoff(2)
 	# time.sleep(3)
 	print("==============================")
-	for i in range(1,20):
+	for i in range(1,4):
 		take_picture(i, connection)
 
 finally:
 	print("rtl")
-	drive('r')
 	connection.close()
 	client_images.close()
 	client_directions.close()
