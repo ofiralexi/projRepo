@@ -7,6 +7,7 @@
   * [Prerequisites](#prerequisites)
   * [Installation](#installation)
 * [Usage](#usage)
+  * [Further Help](#further-help)
 
 
 
