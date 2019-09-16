@@ -24,7 +24,7 @@ It includes:
 * [Raspberry PI 3](www.raspberrypi.org)
 * PiCamera
 * Drone
-* [APM Planner] (http://ardupilot.org/planner2)
+* [APM Planner](http://ardupilot.org/planner2)
 
 
 <!-- GETTING STARTED -->
@@ -34,8 +34,8 @@ It includes:
 
 This is an example of how to list things you need to use the software and how to install them.
 * tensorflow on the computer
-* [drone set up guide] (https://youtu.be/TFDWs_DG2QY)
-* [Model Detection Training and Usage] (https://pythonprogramming.net/introduction-use-tensorflow-object-detection-api-tutorial/)
+* [drone set up guide](https://youtu.be/TFDWs_DG2QY)
+* [Model Detection Training and Usage](https://pythonprogramming.net/introduction-use-tensorflow-object-detection-api-tutorial/)
 
 
 ### Installation
