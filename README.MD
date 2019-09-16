@@ -35,7 +35,6 @@ It includes:
 This is an example of how to list things you need to use the software and how to install them.
 * tensorflow on the computer
 * [drone set up guide](https://youtu.be/TFDWs_DG2QY)
-* [Model Detection Training and Usage](https://pythonprogramming.net/introduction-use-tensorflow-object-detection-api-tutorial/)
 
 
 ### Installation
@@ -53,3 +52,6 @@ git clone https:://github.com/your_username_/Project-Name.git
 2. On your computer, go to scripts/detecting and run server.py
 3. On your Raspberry, go to scripts and run server.py
 
+### Further Help
+
+[Model Detection Training and Usage](https://pythonprogramming.net/introduction-use-tensorflow-object-detection-api-tutorial/)
